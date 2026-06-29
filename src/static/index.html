@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>AI课程知识库问答助手</title>
+    <style>
+        *{box-sizing: border-box;margin:0;padding:0;font-family:Microsoft Yahei}
+        body{max-width:1000px;margin:20px auto;padding:0 20px}
+        .box{border:1px solid #eee;border-radius:10px;padding:20px;margin-bottom:20px}
+        #chat-box{height:400px;overflow-y:auto;border:1px solid #ddd;padding:15px;margin:15px 0;border-radius:8px}
+        .user{text-align:right;margin:8px 0}
+        .bot{text-align:left;margin:8px 0}
+        .msg{display:inline-block;padding:8px 12px;border-radius:12px;max-width:70%}
+        .user .msg{background:#007bff;color:#fff}
+        .bot .msg{background:#e9ecef;color:#222}
+        input,button{padding:10px;font-size:14px}
+        input{width:calc(100% - 120px);margin-right:10px}
+        button{width:100px;background:#007bff;color:white;border:none;border-radius:6px;cursor:pointer}
+    </style>
+</head>
+<body>
+    <h2>📚 课程知识库RAG问答助手</h2>
+    <div class="box">
+        <h4>1. 上传课程PDF课件</h4>
+        <input type="file" id="file-input" accept=".pdf">
+        <button onclick="uploadFile()">上传并解析入库</button>
+        <p id="upload-tip" style="margin-top:10px;color:#666"></p>
+    </div>
+
+    <div class="box">
+        <h4>2. 提问问答</h4>
+        <div id="chat-box"></div>
+        <input id="question-input" placeholder="输入课程相关问题...">
+        <button onclick="sendChat()">发送提问</button>
+    </div>
+
+    <script>
+        async function uploadFile(){
+            const file = document.getElementById('file-input').files[0];
+            if(!file){alert("请选择PDF文件");return}
+            const formData = new FormData();
+            formData.append("file", file);
+            const res = await fetch("/upload_pdf",{method:"POST",body:formData});
+            const data = await res.json();
+            document.getElementById('upload-tip').innerText = data.msg;
+        }
+
+        async function sendChat(){
+            const input = document.getElementById('question-input');
+            const text = input.value.trim();
+            if(!text) return;
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<div class="user"><div class="msg">${text}</div></div>`;
+            input.value = "";
+            const res = await fetch("/chat",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({question:text})
+            })
+            const data = await res.json();
+            chatBox.innerHTML += `<div class="bot"><div class="msg">${data.answer}</div></div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
