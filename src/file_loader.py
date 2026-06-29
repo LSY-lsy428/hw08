@@ -2,6 +2,7 @@ from PyPDF2 import PdfReader
 from typing import List
 
 def load_pdf_text(file_path: str) -> str:
+    """读取PDF全部文本"""
     reader = PdfReader(file_path)
     full_text = ""
     for page in reader.pages:
@@ -11,6 +12,7 @@ def load_pdf_text(file_path: str) -> str:
     return full_text
 
 def split_text(text: str, chunk_size: int = 400, overlap: int = 80) -> List[str]:
+    """文本切块，带重叠"""
     chunks = []
     start = 0
     text_len = len(text)
